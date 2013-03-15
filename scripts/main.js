@@ -7,7 +7,7 @@
 		User Model
 	**/
 	iSocket.Models.Login = Backbone.Model.extend({
-		url: 'http://localhost/iSocket/login.php',
+		url: 'login.php',
 		validate: function(attrs){
 			if(!attrs.username){
 				return 'Please enter Username';
@@ -16,9 +16,13 @@
 				return 'Please enter Password';
 			}
 		},
-		login: function(username, password){
-			return 'success'
-		}
+		login: function(attrs) {
+			return ($.ajax({
+				url:"login.php",
+				type:"post",
+				data:{username:attrs.username, password:attrs.password}
+			}));
+	    }
 	});
 	/**
 		Login View
@@ -38,17 +42,20 @@
 		submit:function(event){
 			event.preventDefault();
 			//Get attributes
-			var username = $(event.currentTarget).find('input[type=text]').val(),
+			var that = this,
+				username = $(event.currentTarget).find('input[type=text]').val(),
 				password = $(event.currentTarget).find('input[type=password]').val();
 			//Send AJAX request to the server
-			this.model.set({
+			this.model.login({
 				username: username,
 				password: password
-			});
-			this.model.save().done(function(){
-				console.log('show dog');
-			}).fail(function(){
-				console.log("ajax failed");
+			}).done(function(res){
+				$('.alert-error').hide();				
+				$('.alert-success').show();
+			}).
+			fail(function(error){
+				$('.alert-success').hide();
+				$('.alert-error').show();
 			});
 		},
 		error: function(model, error){
